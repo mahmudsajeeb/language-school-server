@@ -29,10 +29,17 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     const classDatabase = client.db("schoolDB").collection("classes")
+    const instructorDatabase = client.db("schoolDB").collection("instructor")
 
         //get the data 
         app.get("/classes",async(req,res)=>{
           const result = await classDatabase.find().toArray()
+          res.send(result)
+        })
+
+        //get the data 
+        app.get("/instructor",async(req,res)=>{
+          const result = await instructorDatabase.find().toArray()
           res.send(result)
         })
 
