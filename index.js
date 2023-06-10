@@ -31,6 +31,7 @@ async function run() {
     const classDatabase = client.db("schoolDB").collection("classes")
     const instructorDatabase = client.db("schoolDB").collection("instructor")
     const booksCollection = client.db("schoolDB").collection("books")
+    const userCollection = client.db("schoolDB").collection("user")
 
         //get the data 
         app.get("/classes",async(req,res)=>{
@@ -44,6 +45,38 @@ async function run() {
           res.send(result)
         })
 
+        app.get("/users",  async(req,res)=>{
+          const result = await userCollection.find().toArray()
+          res.send(result)
+        })
+
+        app.post("/users",async(req,res)=>{
+          const user = req.body
+          console.log(user)
+          const query = {email: user.email}
+          const existingUser = await userCollection.findOne(query)
+          console.log('existing user',existingUser)
+          if(existingUser){
+            return res.send({message:'user already exits'})
+          }
+          const result = await userCollection.insertOne(user)
+          res.send(result)
+        })
+        
+    
+      // cart collection 
+
+        app.get("/books", async(req,res)=>{
+          const email = req.query.email
+         
+          if(!email){
+             return res.send([])
+          } 
+            const query = {email:email}
+           const result = await booksCollection.find(query).toArray()
+         return res.send(result)
+        })
+
         app.post("/books",async(req,res) =>{
           const item = req.body 
           const result = await booksCollection.insertOne(item)
@@ -51,17 +84,8 @@ async function run() {
         })
        
         
-        // cart collection 
-        app.get("/books", async(req,res)=>{
-          const email = req.query.email
-          console.log(email)
-          if(!email){
-            return res.send([])
-          } 
-            const query = {email:email}
-           const result = await booksCollection.find(query).toArray()
-         return res.send(result)
-        })
+  
+     
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
