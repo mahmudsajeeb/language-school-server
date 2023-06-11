@@ -3,6 +3,7 @@ const cors = require("cors")
 const port = process.env.PORT || 1000 
 const app = express()
 require('dotenv').config()
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
  
@@ -33,6 +34,12 @@ async function run() {
     const booksCollection = client.db("schoolDB").collection("books")
     const userCollection = client.db("schoolDB").collection("user")
 
+      // jwt token 
+      app.post('/jwt',(req,res)=>{
+        const user = req.body 
+        const token = jwt.sign(user,process.env.ACCESS_TOKEN,  { expiresIn: '88h' })
+        res.send({token})
+      })
         //get the data 
         app.get("/classes",async(req,res)=>{
           const result = await classDatabase.find().toArray()
@@ -63,7 +70,7 @@ async function run() {
           res.send(result)
         })
 
-            app.patch('/user/admin/:id', async (req, res) => {
+            app.patch('/users/admin/:id', async (req, res) => {
               const id = req.params.id;
               console.log(id);
               const filter = { _id: new ObjectId(id) };
