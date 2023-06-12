@@ -103,14 +103,18 @@ async function run() {
 
         
     
-      // cart collection 
+      // book collection 
 
-        app.get("/books", async(req,res)=>{
+        app.get("/books",verifyJWT, async(req,res)=>{
           const email = req.query.email
          
           if(!email){
              return res.send([])
           } 
+          const decodedEmail = req.decoded.email;
+          if (email !== decodedEmail) {
+            return res.status(403).send({ error: true, message: 'forbidden access' })
+          }
             const query = {email:email}
            const result = await booksCollection.find(query).toArray()
          return res.send(result)
