@@ -88,6 +88,15 @@ async function run() {
           const result = await classDatabase.insertOne(newItem)
           res.send(result);
         })
+
+    //       app.delete('/classes/:id', async (req, res) => {
+    //       const email = req.params.email;
+    //        console.log(id)
+    //       const query = { _id: new ObjectId(id) };
+    //       const result = await booksCollection.deleteOne(query);
+    //       console.log(result)
+    //       res.send(result);
+    // })
         //user related ipi the data 
         app.get("/instructor",async(req,res)=>{
           const result = await instructorDatabase.find().toArray()
