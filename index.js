@@ -149,7 +149,7 @@ async function run() {
 
     })
         // check instructor by email 
-        app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
+        app.get('/users/instructor/:email', verifyJWT,verifyInstructor, async (req, res) => {
           const email = req.params.email;
     
           if (req.decoded.email !== email) {
