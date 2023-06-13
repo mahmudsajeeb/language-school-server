@@ -56,19 +56,45 @@ async function run() {
         const token = jwt.sign(user,process.env.ACCESS_TOKEN,  { expiresIn: '88h' })
         res.send({token})
       })
+
+      // verify admin  
+      const verifyAdmin = async (req, res, next) => {
+        const email = req.decoded.email;
+        const query = { email: email }
+        const user = await userCollection.findOne(query);
+        if (user?.role !== 'admin') {
+          return res.status(403).send({ error: true, message: 'forbidden message' });
+        }
+        next();
+      }
+      // verify instructor  
+      const verifyInstructor = async (req, res, next) => {
+        const email = req.decoded.email;
+        const query = { email: email }
+        const user = await userCollection.findOne(query);
+        if (user?.role !== 'instructor') {
+          return res.status(403).send({ error: true, message: 'forbidden message' });
+        }
+        next();
+      }
+  
         //get the data 
         app.get("/classes",async(req,res)=>{
           const result = await classDatabase.find().toArray()
           res.send(result)
         })
-
+        app.post('/classes', verifyJWT,  async (req, res) => {
+          const newItem = req.body;
+          const result = await classDatabase.insertOne(newItem)
+          res.send(result);
+        })
         //user related ipi the data 
         app.get("/instructor",async(req,res)=>{
           const result = await instructorDatabase.find().toArray()
           res.send(result)
         })
 
-        app.get("/users",  async(req,res)=>{
+        app.get("/users",verifyJWT, verifyAdmin, async(req,res)=>{
           const result = await userCollection.find().toArray()
           res.send(result)
         })
@@ -86,7 +112,7 @@ async function run() {
           res.send(result)
         })
 
-        // check email 
+        // check admin by email 
         app.get('/users/admin/:email', verifyJWT, async (req, res) => {
           const email = req.params.email;
     
@@ -106,6 +132,33 @@ async function run() {
               const updateDoc = {
                 $set: {
                   role: 'admin'
+                },
+              };
+
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+
+    })
+        // check instructor by email 
+        app.get('/users/instructor/:email', verifyJWT, async (req, res) => {
+          const email = req.params.email;
+    
+          if (req.decoded.email !== email) {
+            res.send({ instructor: false })
+          }
+    
+          const query = { email: email }
+          const user = await userCollection.findOne(query);
+          const result = { instructor: user?.role === 'instructor' }
+          res.send(result);
+        })
+            app.patch('/users/instructor/:id', async (req, res) => {
+              const id = req.params.id;
+              console.log(id);
+              const filter = { _id: new ObjectId(id) };
+              const updateDoc = {
+                $set: {
+                  role: 'instructor'
                 },
               };
 
